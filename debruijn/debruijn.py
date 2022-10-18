@@ -26,12 +26,12 @@ import statistics
 import matplotlib.pyplot as plt
 matplotlib.use("Agg")
 
-__author__ = "Your Name"
+__author__ = "Paul Etheimer"
 __copyright__ = "Universite Paris Diderot"
-__credits__ = ["Your Name"]
+__credits__ = ["Paul Etheimer"]
 __license__ = "GPL"
 __version__ = "1.0.0"
-__maintainer__ = "Your Name"
+__maintainer__ = "Paul Etheimer"
 __email__ = "your@email.fr"
 __status__ = "Developpement"
 
@@ -70,15 +70,68 @@ def get_arguments():
 
 
 def read_fastq(fastq_file):
-    pass
+    """
+    Reads a fastq file. Returns a sequence generator.
+
+    Parameters
+    ----------
+    fastq_file: str
+    a fastq file
+
+    Returns
+    -------
+    A sequence generator
+    """
+    with open(fastq_file, "r") as filein:
+        id = filein.readline().rstrip()
+        while id:
+            yield filein.readline().rstrip()
+            filein.readline()
+            filein.readline()
+            id = filein.readline().rstrip()
+
+
 
 
 def cut_kmer(read, kmer_size):
-    pass
+    """
+    Returns a generator of kmer from a read.
+
+    Parameters
+    ----------
+    read: str
+    the read to take kmers from
+    kmer_size: int
+    the size of kmers
+
+    Returns
+    -------
+    A generator of kmers
+    """
+    for i in range(len(read) - kmer_size + 1):
+        yield read[i:kmer_size+i]
 
 
 def build_kmer_dict(fastq_file, kmer_size):
-    pass
+    """
+    Creates the kmer dictionary.
+
+    Parameters
+    ----------
+    fastq_file: str
+    The path to the file containing the sequences
+    kmer_size: int
+    The size of the kmers
+
+    Returns
+    -------
+    The dictionary of the kmers and their occurence
+    """
+    kmer_dict = {}
+    for seq in read_fastq(fastq_file):
+        for kmer in cut_kmer(seq, kmer_size):
+            kmer_dict[kmer] = kmer_dict.get(kmer, 0) + 1
+    return kmer_dict
 
 
 def build_graph(kmer_dict):
@@ -89,7 +142,7 @@ def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
     pass
 
 
-def select_best_path(graph, path_list, path_length, weight_avg_list, 
+def select_best_path(graph, path_list, path_length, weight_avg_list,
                      delete_entry_node=False, delete_sink_node=False):
     pass
 
@@ -128,7 +181,7 @@ def fill(text, width=80):
 
 def draw_graph(graph, graphimg_file):
     """Draw the graph
-    """                                    
+    """
     fig, ax = plt.subplots()
     elarge = [(u, v) for (u, v, d) in graph.edges(data=True) if d['weight'] > 3]
     #print(elarge)
@@ -139,7 +192,7 @@ def draw_graph(graph, graphimg_file):
     pos = nx.random_layout(graph)
     nx.draw_networkx_nodes(graph, pos, node_size=6)
     nx.draw_networkx_edges(graph, pos, edgelist=elarge, width=6)
-    nx.draw_networkx_edges(graph, pos, edgelist=esmall, width=6, alpha=0.5, 
+    nx.draw_networkx_edges(graph, pos, edgelist=esmall, width=6, alpha=0.5,
                            edge_color='b', style='dashed')
     #nx.draw_networkx(graph, pos, node_size=10, with_labels=False)
     # save image
@@ -164,7 +217,7 @@ def main():
     args = get_arguments()
 
     # Fonctions de dessin du graphe
-    # A decommenter si vous souhaitez visualiser un petit 
+    # A decommenter si vous souhaitez visualiser un petit
     # graphe
     # Plot the graph
     # if args.graphimg_file:
