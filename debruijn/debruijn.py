@@ -178,16 +178,79 @@ def solve_out_tips(graph, ending_nodes):
     pass
 
 def get_starting_nodes(graph):
-    pass
+    """
+    Gets the starting nodes from a input graph.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+
+    Returns
+    -------
+    A list of starting nodes
+    """
+    return [node for node in nx.nodes(graph) if len(list(graph.predecessors(node))) == 0]
 
 def get_sink_nodes(graph):
-    pass
+    """
+    Gets the sink nodes from a input graph.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+
+    Returns
+    -------
+    A list of end nodes
+    """
+    return [node for node in nx.nodes(graph) if len(list(graph.successors(node))) == 0]
 
 def get_contigs(graph, starting_nodes, ending_nodes):
-    pass
+    """
+    Finds contigs given a graph, starting nodes and ending nodes.
+
+    Parameters
+    ----------
+    graph: nx.DiGraph
+    The entry graph
+    starting_nodes: list
+    a list of starting nodes
+    ending_nodes: list
+    a list of ending nodes
+
+    Returns
+    -------
+    A list of tuples of (contigs, contig_length).
+    """
+    contigs_list = []
+    for sn in starting_nodes:
+        for en in ending_nodes:
+            if nx.has_path(graph, sn, en):
+                for path in nx.all_simple_paths(graph, sn, en):
+                    contig_str = path[0]
+                    for node in path[1:]:
+                        contig_str += node[-1]
+                    contigs_list.append((contig_str, len(contig_str)))
+    return contigs_list
+
 
 def save_contigs(contigs_list, output_file):
-    pass
+    """
+    Saves a contig list to an output file.
+
+    Parameters
+    ----------
+    contigs_list: list
+    A list of all contigs and their length (tuples)
+    output_file: str
+    Path to an output file
+    """
+    with open(output_file, "w") as fileout:
+        for i, contig_tu in enumerate(contigs_list):
+            fileout.write(f">contig_{i} len={contig_tu[1]}" + "\n")
+            fileout.write(fill(contig_tu[0]) + "\n")
 
 
 def fill(text, width=80):
