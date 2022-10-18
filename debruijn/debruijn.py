@@ -135,7 +135,22 @@ def build_kmer_dict(fastq_file, kmer_size):
 
 
 def build_graph(kmer_dict):
-    pass
+    """
+    Creates the de Bruijn graph from a kmer dictionary
+
+    Parameters
+    ----------
+    kmer_dict: dict
+    the kmer dictionary
+
+    Returns
+    -------
+    A graph of prefixes and suffixes of those kmers.
+    """
+    res_graph = nx.DiGraph()
+    for kmer, value in kmer_dict.items():
+        res_graph.add_edge(kmer[:-1], kmer[1:], weight=value)
+    return res_graph
 
 
 def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
