@@ -153,20 +153,87 @@ def build_graph(kmer_dict):
     return res_graph
 
 
-def remove_paths(graph, path_list, delete_entry_node, delete_sink_node):
-    pass
+def remove_paths(graph, paths, delete_entry_node, delete_sink_node):
+    """
+    Removes nodes along a path of a given graph.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+    delete_entry_node: bool
+    whether to delete the first node of the path
+    delete_sink_node: bool
+    whether to delete the last node of the path
+    """
+    for path in paths:
+        if not delete_entry_node:
+            path = path[1:]
+        if not delete_sink_node:
+            path = path[:-1]
+        graph.remove_nodes_from(path)
+    return graph
 
 
 def select_best_path(graph, path_list, path_length, weight_avg_list,
                      delete_entry_node=False, delete_sink_node=False):
-    pass
+    """
+    Compares and selects the best path among many in a graph. Deletes the others.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+    path_list: list
+    A list of paths from which to select
+    path_length: list
+    A list of the length of the paths
+    weight_avg_list: list
+    A list of the average weight of the path
+    delete_entry_node: bool
+    whether to delete the first node of the path
+    delete_sink_node: bool
+    whether to delete the last node of the path
+
+    Returns
+    -------
+    The graph without the worse paths.
+    """
+    if statistics.stdev(weight_avg_list) != 0:
+        del path_list[weight_avg_list.index(max(weight_avg_list))]
+    elif statistics.stdev(path_length) != 0:
+        del path_list[path_length.index(max(path_length))]
+    else:
+        del path_list[randint(0, len(path_list) - 1)]
+    graph = remove_paths(graph, path_list, delete_entry_node, delete_sink_node)
+    return graph
 
 def path_average_weight(graph, path):
     """Compute the weight of a path"""
     return statistics.mean([d["weight"] for (u, v, d) in graph.subgraph(path).edges(data=True)])
 
 def solve_bubble(graph, ancestor_node, descendant_node):
-    pass
+    """
+    Removes all but the best path from a bubble.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+    ancestor_node: node
+    The starting node of the bubble
+    descendant_node: node
+    The ending node of the bubble
+
+    Returns
+    -------
+    The graph with the bubble removed.
+    """
+    bubble_paths = list(nx.all_simple_paths(graph, ancestor_node, descendant_node))
+    path_length = [len(p) for p in bubble_paths]
+    weight_avg_list = [path_average_weight(graph, p) for p in bubble_paths]
+    graph = select_best_path(graph, bubble_paths, path_length, weight_avg_list)
+    return graph
 
 def simplify_bubbles(graph):
     pass
