@@ -14,6 +14,7 @@
 """Perform assembly based on debruijn graph."""
 
 import argparse
+import itertools
 import os
 import sys
 import networkx as nx
@@ -236,7 +237,38 @@ def solve_bubble(graph, ancestor_node, descendant_node):
     return graph
 
 def simplify_bubbles(graph):
-    pass
+    """
+    Returns a graph without bubbles.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+
+    Returns
+    -------
+    The graph without bubbles
+    """
+    nodes = list(graph.nodes())
+    i = len(nodes) - 1
+    while i >= 0:
+        cur_node = nodes[i]
+        prec_nodes = list(graph.predecessors(cur_node))
+        if len(prec_nodes) > 1:
+            ancestors = []
+            for pred_1, pred_2 in itertools.combinations(prec_nodes, 2):
+                ancestor = nx.lowest_common_ancestor(graph, pred_1, pred_2)
+                if ancestor:
+                    ancestors += [ancestor]
+            ancestor_indexes = [nodes.index(anc) for anc in ancestors]
+            graph = solve_bubble(graph, nodes[min(ancestor_indexes)], cur_node)
+            i = min(ancestor_indexes)
+        else:
+            i -= 1
+    return graph
+
+            
+
 
 def solve_entry_tips(graph, starting_nodes):
     pass
