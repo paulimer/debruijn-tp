@@ -271,7 +271,30 @@ def simplify_bubbles(graph):
 
 
 def solve_entry_tips(graph, starting_nodes):
-    pass
+    """
+    Simplifies the entry of the graph.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+    starting_nodes: list
+    a list of the entry nodes
+
+    Returns
+    -------
+    The graog without the tips
+    """
+    if len(starting_nodes) == 1:
+        return graph
+    in_nodes_tupples_list = list(itertools.combinations(starting_nodes, 2))
+    for (node1, node2), desc in nx.all_pairs_lowest_common_ancestor(graph.reverse(), pairs=in_nodes_tupples_list):
+        path_list = list(nx.all_simple_paths(graph, node1, desc)) + list(nx.all_simple_paths(graph, node2, desc))
+        weights = [path_average_weight(graph, p) for p in path_list]
+        lengths = [len(p) for p in path_list]
+        graph = select_best_path(graph, path_list, lengths, weights, True, False)
+    return graph
+
 
 def solve_out_tips(graph, ending_nodes):
     pass
