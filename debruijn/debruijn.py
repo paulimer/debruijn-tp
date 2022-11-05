@@ -433,23 +433,21 @@ def save_graph(graph, graph_file):
 #==============================================================
 # Main program
 #==============================================================
-def main():
+if __name__ == '__main__':
     """
     Main program function
     """
     # Get arguments
     args = get_arguments()
 
-    # Fonctions de dessin du graphe
-    # A decommenter si vous souhaitez visualiser un petit
-    # graphe
-    # Plot the graph
-    # if args.graphimg_file:
-    #     draw_graph(graph, args.graphimg_file)
-    # Save the graph in file
-    # if args.graph_file:
-    #     save_graph(graph, args.graph_file)
+    kmer_dict = build_kmer_dict(args.fastq_file, args.kmer_size)
+    graph = build_graph(kmer_dict)
+    graph = simplify_bubbles(graph)
+    graph = solve_entry_tips(graph, get_starting_nodes(graph))
+    graph = solve_out_tips(graph, get_sink_nodes(graph))
+    contigs = get_contigs(graph, get_starting_nodes(graph), get_sink_nodes(graph))
+    if(args.output_file):
+        save_contigs(contigs, args.output_file)
+    if args.graphimg_file:
+        draw_graph(graph, args.graphimg_file)
 
-
-if __name__ == '__main__':
-    main()
