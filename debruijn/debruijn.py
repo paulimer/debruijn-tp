@@ -283,7 +283,7 @@ def solve_entry_tips(graph, starting_nodes):
 
     Returns
     -------
-    The graog without the tips
+    The graog without the entry tips
     """
     if len(starting_nodes) == 1:
         return graph
@@ -297,7 +297,31 @@ def solve_entry_tips(graph, starting_nodes):
 
 
 def solve_out_tips(graph, ending_nodes):
-    pass
+    """
+    Simplifies the ending of the graph.
+
+    Parameters
+    ----------
+    graph: networkx.DiGraph
+    The input graph
+    starting_nodes: list
+    a list of the exit nodes
+
+    Returns
+    -------
+    The graog without the out tips
+    """
+    if len(ending_nodes) == 1:
+        return graph
+    out_nodes_tupples_list = list(itertools.combinations(ending_nodes, 2))
+    for (node1, node2), pred in nx.all_pairs_lowest_common_ancestor(graph, pairs=out_nodes_tupples_list):
+        path_list = list(nx.all_simple_paths(graph, pred, node1)) + list(nx.all_simple_paths(graph, pred, node2))
+        weights = [path_average_weight(graph, p) for p in path_list]
+        lengths = [len(p) for p in path_list]
+        graph = select_best_path(graph, path_list, lengths, weights, False, True)
+    return graph
+
+
 
 def get_starting_nodes(graph):
     """
